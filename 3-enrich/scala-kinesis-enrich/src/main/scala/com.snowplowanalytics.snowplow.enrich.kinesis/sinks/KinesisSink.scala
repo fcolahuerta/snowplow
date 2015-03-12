@@ -136,6 +136,8 @@ class KinesisSink(provider: AWSCredentialsProvider,
     }
   }
 
+  val BackoffTime = 3000L
+
   val ByteThreshold = config.byteLimit
   val RecordThreshold = config.recordLimit
   val TimeThreshold = config.timeLimit
@@ -259,7 +261,8 @@ class KinesisSink(provider: AWSCredentialsProvider,
           case NonFatal(f) => {
             error(s"Writing failed.")
             error(s"  + " + f.getMessage)
-            error(s"  + Retrying...")
+            error(s"  + Retrying in $BackoffTime milliseconds...")
+            Thread.sleep(BackoffTime)
             sendBatch(batch)
           }
         }
